@@ -1,0 +1,82 @@
+type Conjunto a = [a]
+type Fila = [Integer]
+type Tablero = [Fila]
+type Posicion = (Integer,Integer)
+type Camino = [Posicion]
+
+sopa1 :: Tablero
+sopa1 = [[13,12,6,4],[1,1,32,25],[9,2,16,8],[7,3,5,4],[1,2,8,2]]
+
+sopa2 :: Tablero
+sopa2 = [[64,5,16,8,9],[32,16,8,4,28],[2,1,4,6,3],[8,4,2,1,10]]
+
+sopa3 :: Tablero
+sopa3 = [[10,5,7,9],[32,16,22,28],[8,4,11,34],[12,6,10,17]]
+
+sopa4 :: Tablero
+sopa4 = [[1,1,2,1], [1,8,4,1], [10,1,1,1], [5,16,1,1]]
+
+camino1 :: Camino 
+camino1 = [(3,3),(3,4),(4,4)]
+
+camino2 :: Camino 
+camino2 = [(1,2),(2,2),(2,3),(3,3),(4,3)]
+
+camino3 :: Camino 
+camino3 = [(1,3),(2,3),(3,3),(3,4)]
+
+camino4 :: Camino
+camino4 = [(4,1),(4,2),(4,3)]
+
+maximoTab :: Tablero -> Integer
+maximoTab [x] = maximoFila x --Estaba bien represenar al tablero de una sola fila con pattern matching?
+maximoTab (x:y:cx)
+ | maximoFila x > maximoFila y = maximoTab (x:cx)
+ | otherwise = maximoTab (y:cx)
+
+maximoFila :: [Integer] -> Integer
+maximoFila [x] = x
+maximoFila (x:y:xs) --Esta bien representar a filas como listas?
+ | x > y = maximoFila (x:xs)
+ | otherwise = maximoFila (y:xs)
+
+maximoNum :: Integer -> Integer -> Integer
+maximoNum x y
+ | x > y = x
+ | otherwise = y
+
+valor :: Tablero -> Posicion -> Integer
+valor (x:cx) p 
+ | fst p == 1 = columna p x
+ | otherwise = valor cx ((fst p) - 1, snd p)
+
+columna :: Posicion -> Fila -> Integer
+columna (1, c) (x:xs)
+ | c == 1 = x
+ | otherwise = columna (1, (c - 1)) xs
+
+valoresDeCamino :: Tablero -> Camino -> [Integer]
+valoresDeCamino t [] = []
+valoresDeCamino t (x:xs) = (valor t x):(valoresDeCamino t xs)
+
+sucCollatz :: Integer -> Integer
+sucCollatz 1 = 1
+sucCollatz n 
+ | mod n 2 == 0 = sucCollatz (div n 2)
+ | otherwise = sucCollatz (3*n + 1)
+
+terminoSucCollatz :: Integer -> Integer
+terminoSucCollatz n 
+ | mod n 2 == 0 = div n 2
+ | otherwise = 3*n + 1
+
+esFilaDeCollatz :: [Integer] -> Bool
+esFilaDeCollatz [x] = True
+esFilaDeCollatz (x:y:xs)
+ | y == terminoSucCollatz x = esFilaDeCollatz (y:xs) --Error porque sucCollatz de cualquier cosa da 1
+ | otherwise = False
+
+caminoDeCollatz :: Tablero -> Camino -> Integer -> Bool
+caminoDeCollatz t (c:cs) n 
+ | ((valor t c) == n) && (esFilaDeCollatz (valoresDeCamino t (c:cs))) = True
+ | otherwise = False 
