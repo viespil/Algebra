@@ -123,6 +123,17 @@ pertenece :: Eq a => a -> [a] -> Bool
 pertenece _ [] = False
 pertenece a (x:xs) = a == x || pertenece a xs
 
+reemplazar :: Integer -> Integer -> [Integer] -> [Integer]
+reemplazar a b (x:xs)
+ | a == x = (b:xs)
+ | otherwise = x:(reemplazar a b xs)
+
+reemplazarTab :: Integer -> Integer -> Tablero -> Tablero
+reemplazarTab _ _ [] = []
+reemplazarTab a b (f:fs)
+ | pertenece a f = ((reemplazar a b f):fs)
+ | otherwise = f:(reemplazarTab a b fs)
+
 buscarColumna :: Fila -> Integer -> Integer
 buscarColumna (n:ns) a
  | n == a = 1
@@ -133,6 +144,17 @@ posicion [] _ = (0, 0)
 posicion (f:fs) a
  | pertenece a f = (1, buscarColumna f a)
  | otherwise = (1 + (fst (posicion fs a)), (snd (posicion fs a)))
+ 
+perteneceATablero :: Integer -> Tablero -> Bool
+perteneceATablero _ [] = False
+perteneceATablero n (f:fs)
+ | pertenece n f = True
+ | otherwise = perteneceATablero n fs
+
+posicionesTablero :: Tablero -> Integer -> [(Integer, Integer)]
+posicionesTablero t n 
+ | perteneceATablero n t = (posicion t n):(posicionesTablero (reemplazarTab n (-n) t) n)
+ | otherwise = []
 
                                        
 
