@@ -44,6 +44,67 @@ maximo (x:y:cx)
  | maximoFila x > maximoFila y = maximo (x:cx)
  | otherwise = maximo (y:cx)
 
+--EJERCICIO 2 
+
+--Convierte un tablero en una lista (concatenando las filas)
+aplanar :: Tablero -> [Integer]
+aplanar [] = []
+aplanar t = (head t) ++ (aplanar (tail t))
+
+{-Dada una lista, crea una lista de tuplas donde cada fst de cada tupla es un elemento de la lista y el snd siempre es un 1. El 1
+hace referencia a la cantidad de apariciones de numeros iguales (mas adelante, en otra funcion veremos que tuplas tienen el mismo 
+fst y a esas les sumaremos esos 1's). Ejemplo: tuplar [2,3,2] devuelve [(2,1),(3,1),(2,1)]-}
+tuplar :: [Integer] -> [(Integer, Integer)]
+tuplar [] = []
+tuplar (x:xs) = (x, 1):(tuplar xs)
+
+{-En esta parte sumamos los 1's de la primer tupla
+Ejemplo: comprimirPrimero [(2,1),(3,1),(2,1)] ~ como 2 y 3 son distinos entra por la segunda guarda ~ 
+comprimirPrimero [(2,1),(2,1)] ~ como 2 y 2 son iguales entra por la primera guarda ~ comprimirPrimero (2,1+1):[] ~ [(2,2)]-}
+comprimirPrimero :: [(Integer, Integer)] -> [(Integer, Integer)]
+comprimirPrimero [x] = [x]
+comprimirPrimero ((x1, y1):(x2,y2):xs) | x1 == x2 = comprimirPrimero ((x1, y1 + y2):xs)
+                                       | otherwise = comprimirPrimero ((x1, y1):xs)                                      
+
+{-Dada una tupla y una lista de tuplas, quita todas las apariciones de la tupla de la lista
+quitarTupla :: (Integer, Integer) -> [(Integer, Integer)] -> [(Integer, Integer)]
+quitarTupla _ [] = []
+quitarTupla n (x:xs)
+ | n == x = quitarTupla n xs
+ | otherwise = x:(quitarTupla n xs)
+
+{-Dada una lista de tuplas de la forma (numero, 1), sumamos los 1's de todas las tuplas. Primero sumamos los 1's de la primera tupla y
+lo concatenamos con la lista que resulta de volver a llamar a la funcion, pero quitando todas las apariciones de la tupla que ya
+comprimimos (que fue la primera)
+Ejemplo: comprimir [(2,1),(3,1),(2,1)] ~ (comprimirPrimero [(2,1),(3,1),(2,1)]) ++ (comprimir (quitarTupla (2,1) [(2,1),(3,1),(2,1)]))
+~ [(2,2)] ++ (comprimir [(3,1)]) ~ [(2,2)] ++ (comprimirPrimero [(3,1)]) ++ (comprimir (quitarTupla (3,1) [(3,1)]))
+~ [(2,2)] ++ [(3,1)] ++ comprimir [] ~ [(2,2),(3,1)] ++ [] ~ [(2,2),(3,1)]-}
+
+comprimir :: [(Integer, Integer)] -> [(Integer, Integer)]
+comprimir [] = []
+comprimir (x:xs) = (comprimirPrimero (x:xs))++(comprimir (quitarTupla x (x:xs)))
+
+{-Una vez que comprimimos a [(2,1),(3,1),(2,1)] como [(2,2),(3,1)], falta ver cual tiene el snd mas grande (el snd hace referencia
+a la cantidad de apariciones)
+Ejemplo: masApariciones [(2,2),(3,1)] ~ como el 2 es mayor que el 1, entra por la primera guarda ~ masApariciones (2,2):[]
+~ masApariciones [(2,2)] ~ 2-}
+
+masApariciones :: [(Integer, Integer)] -> Integer
+masApariciones [(x1, x2)] = x1
+masApariciones ((x1, x2):(y1, y2):xs)
+ | x2 >= y2 = masApariciones ((x1, x2):xs)
+ | otherwise = masApariciones ((y1, y2):xs)
+
+{-Devuelve el elemento mas repetido de una lista-}
+
+masRepetidoLista :: [Integer] -> Integer
+masRepetidoLista xs = masApariciones (comprimir (tuplar xs))
+
+{-Convertimos al tablero en una lista y buscamos el elemento mas repetido de esa lista-}
+
+masRepetido :: Tablero -> Integer
+masRepetido t = masRepetidoLista (aplanar t)
+
 --EJERCICIO 3
 
 -- Devuelve el valor de una posicion de un tablero (funciones dadas en el esqueleto)
@@ -58,6 +119,7 @@ valorY (c:cs) n = valorY cs (n-1)
 {-Dado un tablero y un camino, busca el valor de la primera posicion del camino (el primer elemento) y vuelve a llamar a la funcion
 con las demas posiciones del camino (los demas elementos = la tail de camino). Cuando ya no hay mas elementos en el camino, devuelve
 la lista vacía, que une todo en una lista-}
+
 valoresDeCamino :: Tablero -> Camino -> [Integer]
 valoresDeCamino t [] = []
 valoresDeCamino t (x:xs) = (valor t x):(valoresDeCamino t xs)
@@ -75,6 +137,7 @@ primer termino devuelve el segundo termino). (*)Si se cumple con el primero y co
 de la lista (para ver si se cumple con el segundo y el tercero de la lista inicial). Si nos quedamos con un elemento, la tail es la
 lista vacia, y eso significa que funciono para todos los elementos anteriores. Entonces devuelve True. Si esto no se cumple quiere
 decir que para algun par de elementos no fue cierto la afirmacion entre (*), entonces devuelve False.-}
+
 esListaDeCollatz :: [Integer] -> Bool
 esListaDeCollatz [x] = True
 esListaDeCollatz (x:y:xs)
@@ -85,60 +148,27 @@ esListaDeCollatz (x:y:xs)
 nos tenemos que asegurar de que el numero que nos pasan sea el mismo que la primera posicion del camino (el primer elemento). Si eso se
 cumple y tambien que la lista que obtenemos de traducir las posiciones a elementos del tablero cumple la sucesion de Collatz, devolvemos
 True. Si alguna de las anteriores no se cumple, devolvemos False.-}
+
 caminoDeCollatz :: Tablero -> Camino -> Integer -> Bool
 caminoDeCollatz t (c:cs) n 
  | ((valor t c) == n) && (esListaDeCollatz (valoresDeCamino t (c:cs))) = True
  | otherwise = False 
- 
---EJERCICIO 2 
- 
-aplanar :: Tablero -> [Integer]
-aplanar [] = []
-aplanar t = (head t) ++ (aplanar (tail t))
 
-tuplar :: [Integer] -> [(Integer, Integer)]
-tuplar [] = []
-tuplar (x:xs) = (x, 1):(tuplar xs)
-
-comprimirPrimero :: [(Integer, Integer)] -> [(Integer, Integer)]
-comprimirPrimero [x] = [x]
-comprimirPrimero ((x1, y1):(x2,y2):xs) | x1 == x2 = comprimirPrimero ((x1, y1 + y2):xs)
-                                       | otherwise = comprimirPrimero ((x1, y1):xs)
-                                       
-deslistar :: [a] -> a
-deslistar [a] = a
-
-quitarTupla :: (Integer, Integer) -> [(Integer, Integer)] -> [(Integer, Integer)]
-quitarTupla _ [] = []
-quitarTupla n (x:xs)
- | n == x = quitarTupla n xs
- | otherwise = x:(quitarTupla n xs)
-
-comprimir :: [(Integer, Integer)] -> [(Integer, Integer)]
-comprimir [] = []
-comprimir (x:xs) = (deslistar (comprimirPrimero (x:xs))):(comprimir (quitarTupla x (x:xs)))
-
-masApariciones :: [(Integer, Integer)] -> Integer
-masApariciones [(x1, x2)] = x1
-masApariciones ((x1, x2):(y1, y2):xs)
- | x2 >= y2 = masApariciones ((x1, x2):xs)
- | otherwise = masApariciones ((y1, y2):xs)
- 
-masRepetidoLista :: [Integer] -> Integer
-masRepetidoLista xs = masApariciones (comprimir (tuplar xs))
-
-masRepetido :: Tablero -> Integer
-masRepetido t = masRepetidoLista (aplanar t)
+--EJERCICIO 5
 
 pertenece :: Eq a => a -> [a] -> Bool
 pertenece _ [] = False
 pertenece a (x:xs) = a == x || pertenece a xs
 
+{-Dados dos numeros y una lista, reemplaza al primer numero por el segundo en la lista (suponemos que el primer numero pertenece
+a la lista)-}
+
 reemplazar :: Integer -> Integer -> [Integer] -> [Integer]
 reemplazar a b (x:xs)
  | a == x = (b:xs)
  | otherwise = x:(reemplazar a b xs)
-
+ 
+{-Dados dos numeros y un tablero, reemplaza al primer numero por el segundo en el tablero-}
 reemplazarTab :: Integer -> Integer -> Tablero -> Tablero
 reemplazarTab _ _ [] = []
 reemplazarTab a b (f:fs)
@@ -149,12 +179,15 @@ buscarColumna :: Fila -> Integer -> Integer
 buscarColumna (n:ns) a
  | n == a = 1
  | otherwise = 1 + buscarColumna ns a
- 
-posicion :: Tablero -> Integer -> (Integer, Integer)
-posicion [] _ = (0, 0)
-posicion (f:fs) a
+
+
+{-Dado un tablero y un numero, devuelve la posicion de la primera aparicion. Si el numero no pertenece al tablero devuelve (0,0)-}
+
+primeraPosicion :: Tablero -> Integer -> (Integer, Integer)
+primeraPosicion [] _ = (0, 0)
+primeraPosicion (f:fs) a
  | pertenece a f = (1, buscarColumna f a)
- | otherwise = (1 + (fst (posicion fs a)), (snd (posicion fs a)))
+ | otherwise = (1 + (fst (primeraPosicion fs a)), (snd (primeraPosicion fs a)))
  
 perteneceATablero :: Integer -> Tablero -> Bool
 perteneceATablero _ [] = False
@@ -162,9 +195,20 @@ perteneceATablero n (f:fs)
  | pertenece n f = True
  | otherwise = perteneceATablero n fs
 
+{-Dado un tablero y un numero, devuelve todas las posiciones de ese numero en el tablero. Primero busca la de la primera aparicion,
+la guarda, y cuando vuelve a llamar a la funcion reemplaza el numero por el mismo con el signo cambiado (asi conservamos la misma
+cantidad de elementos y cuando vuelve a buscar la primera aparicion, en realidad ahora encontraria la segunda)
+Ejemplo: posicionesTablero [[2,1], [3,2], [2,1]] 2 ~
+(primeraPosicion [[2,1], [3,2], [2,1]] 2):(posicionesTablero [[-2,1], [3,2], [2,1]] 2) 
+~ (1,1):(primeraPosicion [[-2,1], [3,2], [2,1]] 2):(posicionesTablero [[-2,1], [3,-2], [2,1]] 2)
+~ (1,1):(2,2):(posicionesTablero [[-2,1], [3,-2], [2,1]] 2)
+~ (1,1):(2,2):(primeraPosicion [[-2,1], [3,-2], [2,1]] 2):(posicionesTablero [[-2,1], [3,-2], [-2,1]] 2)
+~ (1,1):(2,2):(3,1):(posicionesTablero [[-2,1], [3,-2], [-2,1]] 2) Como ya el 2 no pertenece a este tablero devuelve []
+~ (1,1):(2,2):(3,1):[] ~ [(1,1):(2,2):(3,1)] -}
+
 posicionesTablero :: Tablero -> Integer -> [(Integer, Integer)]
 posicionesTablero t n 
- | perteneceATablero n t = (posicion t n):(posicionesTablero (reemplazarTab n (-n) t) n)
+ | perteneceATablero n t = (primeraPosicion t n):(posicionesTablero (reemplazarTab n (-n) t) n)
  | otherwise = []
 
                                        
