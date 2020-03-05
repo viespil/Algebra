@@ -195,6 +195,7 @@ listaMasLarga xs ys
 
 --Dada una lista de listas, devuelve la lista mas larga
 listaMasLarga2 :: [[Integer]] -> [Integer]
+listaMasLarga2 [x] = x
 listaMasLarga2 [x, y] = listaMasLarga x y
 listaMasLarga2 (x:y:xs)
  | (length x) >= (length y) = listaMasLarga2 (x:xs)
@@ -238,6 +239,7 @@ posicionesTablero t n
  | perteneceATablero n t = (primeraPosicion t n):(posicionesTablero (reemplazarTab n (-n) t) n)
  | otherwise = [] 
 
+{-Dado un tablero y dos posiciones, determina si la segunda resulta de aplicarle la sucesion de Collatz a la primera-}
 esCollatz :: Tablero -> Posicion -> Posicion -> Bool
 esCollatz t p1 p2
  | (valor t p1) == 1 = False
