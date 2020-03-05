@@ -28,6 +28,27 @@ camino3 = [(1,3),(2,3),(3,3),(3,4)]
 camino4 :: Camino
 camino4 = [(4,1),(4,2),(4,3)]
 
+-- Dado la cantidad filas de un tablero.
+cantidadFilas :: Tablero -> Integer
+cantidadFilas t = fromIntegral (length t)
+
+-- Dado la cantidad columnas de un tablero.
+cantidadColumnas :: Tablero -> Integer
+cantidadColumnas (t:ts) = fromIntegral (length t)
+
+-- Devuelve el valor de una posicion de un tablero
+valor :: Tablero -> Posicion -> Integer
+valor (t:ts) (1,y) = valorY t y
+valor (t:ts) (x,y) = valor ts (x-1,y)
+
+valorY :: [Integer] -> Integer -> Integer
+valorY (c:cs) 1 = c
+valorY (c:cs) n = valorY cs (n-1)
+
+-- Determina si una posicion esta dentro de los limites de un tablero
+posValida :: Tablero -> Posicion -> Bool
+posValida t (x,y) = x >= 1 && x <= (cantidadFilas t) && y >= 1 && y <= (cantidadColumnas t) 
+
 --EJERCICIO 1
 
 --Dada una fila (lista), devuelve su mayor elemento
@@ -66,7 +87,7 @@ comprimirPrimero [x] = [x]
 comprimirPrimero ((x1, y1):(x2,y2):xs) | x1 == x2 = comprimirPrimero ((x1, y1 + y2):xs)
                                        | otherwise = comprimirPrimero ((x1, y1):xs)                                      
 
-{-Dada una tupla y una lista de tuplas, quita todas las apariciones de la tupla de la lista
+--Dada una tupla y una lista de tuplas, quita todas las apariciones de la tupla de la lista
 quitarTupla :: (Integer, Integer) -> [(Integer, Integer)] -> [(Integer, Integer)]
 quitarTupla _ [] = []
 quitarTupla n (x:xs)
@@ -106,15 +127,6 @@ masRepetido :: Tablero -> Integer
 masRepetido t = masRepetidoLista (aplanar t)
 
 --EJERCICIO 3
-
--- Devuelve el valor de una posicion de un tablero (funciones dadas en el esqueleto)
-valor :: Tablero -> Posicion -> Integer
-valor (t:ts) (1,y) = valorY t y
-valor (t:ts) (x,y) = valor ts (x-1,y)
-
-valorY :: [Integer] -> Integer -> Integer
-valorY (c:cs) 1 = c
-valorY (c:cs) n = valorY cs (n-1)
 
 {-Dado un tablero y un camino, busca el valor de la primera posicion del camino (el primer elemento) y vuelve a llamar a la funcion
 con las demas posiciones del camino (los demas elementos = la tail de camino). Cuando ya no hay mas elementos en el camino, devuelve
@@ -175,11 +187,26 @@ reemplazarTab a b (f:fs)
  | pertenece a f = ((reemplazar a b f):fs)
  | otherwise = f:(reemplazarTab a b fs)
 
+--Dadas dos listas, devuelve la mas larga
+listaMasLarga :: [Integer] -> [Integer] -> [Integer]
+listaMasLarga xs ys
+ | length xs >= length ys = xs
+ | otherwise = ys
+
+--Dada una lista de listas, devuelve la lista mas larga
+listaMasLarga2 :: [[Integer]] -> [Integer]
+listaMasLarga2 [x, y] = listaMasLarga x y
+listaMasLarga2 (x:y:xs)
+ | (length x) >= (length y) = listaMasLarga2 (x:xs)
+ | otherwise = listaMasLarga2 (y:xs)
+
+{-Dada una fila y un numero de la fila, busca la columna en la que aparece (lo que es lo mismo que buscar la posicion de un numero
+en una lista). Suponemos que el numero pertenece a la Fila-}
+
 buscarColumna :: Fila -> Integer -> Integer
 buscarColumna (n:ns) a
  | n == a = 1
  | otherwise = 1 + buscarColumna ns a
-
 
 {-Dado un tablero y un numero, devuelve la posicion de la primera aparicion. Si el numero no pertenece al tablero devuelve (0,0)-}
 
@@ -209,7 +236,47 @@ Ejemplo: posicionesTablero [[2,1], [3,2], [2,1]] 2 ~
 posicionesTablero :: Tablero -> Integer -> [(Integer, Integer)]
 posicionesTablero t n 
  | perteneceATablero n t = (primeraPosicion t n):(posicionesTablero (reemplazarTab n (-n) t) n)
- | otherwise = []
+ | otherwise = [] 
+
+esCollatz :: Tablero -> Posicion -> Posicion -> Bool
+esCollatz t p1 p2
+ | (valor t p1) == 1 = False
+ | (terminoSucCollatz (valor t p1)) == (valor t p2) = True
+ | otherwise = False
+
+{-Dado un tablero y una posicion, determina que hacer con la posicion siguiente correspondiente a la trayectoria de un camino (el 
+elemento a la derecha o abajo)-}
+verSiguiente :: Tablero -> Posicion -> [Integer]
+verSiguiente t (x, y)
+ | ambasValidasAmbasCollatz = listaMasLarga ((valor t (x, y)):(verSiguiente t (x, y + 1))) ((valor t (x, y)):(verSiguiente t (x + 1, y)))
+ | ambasValidasPrimeraCollatz = (valor t (x,y)):(verSiguiente t (x, y + 1))
+ | ambasValidasSegundaCollatz = (valor t (x,y)):(verSiguiente t (x + 1, y))
+ | ambasValidasNingunaCollatz = [valor t (x,y)]
+ | segundaValidaNoCollatz = [valor t (x,y)]
+ | segundaValidaYCollatz = (valor t (x,y)):(verSiguiente t (x + 1, y))
+ | primeraValidaYCollatz = (valor t (x,y)):(verSiguiente t (x, y + 1))
+ | primeraValidaNoCollatz = [valor t (x,y)]
+ | ningunaValida = [valor t (x,y)]
+ where ambasValidasAmbasCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && (esCollatz t (x, y) (x, y + 1)) && (esCollatz t (x, y) (x + 1, y))
+       ambasValidasPrimeraCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && (esCollatz t (x, y) (x, y + 1)) && not (esCollatz t (x, y) (x + 1, y))
+       ambasValidasSegundaCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x, y + 1)) && (esCollatz t (x, y) (x + 1, y))
+       ambasValidasNingunaCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x, y + 1)) && not (esCollatz t (x, y) (x + 1, y))
+       segundaValidaNoCollatz = not (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x + 1, y))
+       segundaValidaYCollatz = not (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && (esCollatz t (x, y) (x + 1, y))
+       primeraValidaYCollatz = (posValida t (x, y + 1)) && not (posValida t (x + 1, y)) && (esCollatz t (x, y) (x, y + 1))
+       primeraValidaNoCollatz = (posValida t (x, y + 1)) && not (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x, y + 1))
+       ningunaValida = not (posValida t (x, y + 1)) && not (posValida t (x + 1, y))
+
+{-Dado un tablero y una lista de posiciones, devuelve todos los caminos posibles empezando por cada posicion-}
+caminos :: Tablero -> [Posicion] -> [[Integer]]
+caminos _ [] = []
+caminos t (p:ps) = (verSiguiente t p):(caminos t ps) 
+
+--Dado un tablero y un numero del tablero, devuelve la secuencia de Collatz mas larga
+mayorSecuenciaDeCollatz :: Tablero -> Integer -> [Integer]
+mayorSecuenciaDeCollatz t n = listaMasLarga2 (caminos t (posicionesTablero t n))
+       
+ 
 
                                        
 
