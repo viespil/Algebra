@@ -28,58 +28,69 @@ camino3 = [(1,3),(2,3),(3,3),(3,4)]
 camino4 :: Camino
 camino4 = [(4,1),(4,2),(4,3)]
 
-maximoTab :: Tablero -> Integer
-maximoTab [x] = maximoFila x --Estaba bien represenar al tablero de una sola fila con pattern matching?
-maximoTab (x:y:cx)
- | maximoFila x > maximoFila y = maximoTab (x:cx)
- | otherwise = maximoTab (y:cx)
+--EJERCICIO 1
 
+--Dada una fila (lista), devuelve su mayor elemento
 maximoFila :: [Integer] -> Integer
 maximoFila [x] = x
-maximoFila (x:y:xs) --Esta bien representar a filas como listas?
+maximoFila (x:y:xs) 
  | x > y = maximoFila (x:xs)
  | otherwise = maximoFila (y:xs)
 
-maximoNum :: Integer -> Integer -> Integer
-maximoNum x y
- | x > y = x
- | otherwise = y
+--Dado un tablero, devuelve el mayor elemento (comparando el mayor de cada fila)
+maximo :: Tablero -> Integer
+maximo [x] = maximoFila x 
+maximo (x:y:cx)
+ | maximoFila x > maximoFila y = maximo (x:cx)
+ | otherwise = maximo (y:cx)
 
+--EJERCICIO 3
+
+-- Devuelve el valor de una posicion de un tablero (funciones dadas en el esqueleto)
 valor :: Tablero -> Posicion -> Integer
-valor (x:cx) p 
- | fst p == 1 = columna p x
- | otherwise = valor cx ((fst p) - 1, snd p)
+valor (t:ts) (1,y) = valorY t y
+valor (t:ts) (x,y) = valor ts (x-1,y)
 
-columna :: Posicion -> Fila -> Integer
-columna (1, c) (x:xs)
- | c == 1 = x
- | otherwise = columna (1, (c - 1)) xs
+valorY :: [Integer] -> Integer -> Integer
+valorY (c:cs) 1 = c
+valorY (c:cs) n = valorY cs (n-1)
 
+{-Dado un tablero y un camino, busca el valor de la primera posicion del camino (el primer elemento) y vuelve a llamar a la funcion
+con las demas posiciones del camino (los demas elementos = la tail de camino). Cuando ya no hay mas elementos en el camino, devuelve
+la lista vacía, que une todo en una lista-}
 valoresDeCamino :: Tablero -> Camino -> [Integer]
 valoresDeCamino t [] = []
 valoresDeCamino t (x:xs) = (valor t x):(valoresDeCamino t xs)
 
-sucCollatz :: Integer -> Integer
-sucCollatz 1 = 1
-sucCollatz n 
- | mod n 2 == 0 = sucCollatz (div n 2)
- | otherwise = sucCollatz (3*n + 1)
+--EJERCICIO 4
 
+--Dado un numero, le aplica la sucesion de Collatz
 terminoSucCollatz :: Integer -> Integer
 terminoSucCollatz n 
  | mod n 2 == 0 = div n 2
  | otherwise = 3*n + 1
 
-esFilaDeCollatz :: [Integer] -> Bool
-esFilaDeCollatz [x] = True
-esFilaDeCollatz (x:y:xs)
- | y == terminoSucCollatz x = esFilaDeCollatz (y:xs) --Error porque sucCollatz de cualquier cosa da 1
+{-Dada una lista, determina si sus elementos siguen la sucesion de Collatz (preguntando si el resultado de aplicarle la sucesion al
+primer termino devuelve el segundo termino). (*)Si se cumple con el primero y con el segundo(*), vuelve a llamar a la funcion con la tail
+de la lista (para ver si se cumple con el segundo y el tercero de la lista inicial). Si nos quedamos con un elemento, la tail es la
+lista vacia, y eso significa que funciono para todos los elementos anteriores. Entonces devuelve True. Si esto no se cumple quiere
+decir que para algun par de elementos no fue cierto la afirmacion entre (*), entonces devuelve False.-}
+esListaDeCollatz :: [Integer] -> Bool
+esListaDeCollatz [x] = True
+esListaDeCollatz (x:y:xs)
+ | y == terminoSucCollatz x = esListaDeCollatz (y:xs) 
  | otherwise = False
 
+{-Dado un tablero, un camino y el numero donde deberia empezar la sucesion, determina si el camino resultante es de Collatz. Primero
+nos tenemos que asegurar de que el numero que nos pasan sea el mismo que la primera posicion del camino (el primer elemento). Si eso se
+cumple y tambien que la lista que obtenemos de traducir las posiciones a elementos del tablero cumple la sucesion de Collatz, devolvemos
+True. Si alguna de las anteriores no se cumple, devolvemos False.-}
 caminoDeCollatz :: Tablero -> Camino -> Integer -> Bool
 caminoDeCollatz t (c:cs) n 
- | ((valor t c) == n) && (esFilaDeCollatz (valoresDeCamino t (c:cs))) = True
+ | ((valor t c) == n) && (esListaDeCollatz (valoresDeCamino t (c:cs))) = True
  | otherwise = False 
+ 
+--EJERCICIO 2 
  
 aplanar :: Tablero -> [Integer]
 aplanar [] = []
