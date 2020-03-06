@@ -232,6 +232,16 @@ esListaDeCollatz (x:y:xs)
  | y == terminoSucCollatz x = esListaDeCollatz (y:xs) 
  | otherwise = False
 
+{-Ejemplos:
+esListaDeCollatz [10,5,16]
+esListaDeCollatz [5,16]
+esListaDeCollatz [16]
+True
+
+esListaDeCollatz [10,5,2]
+esListaDeCollatz [5,2]
+False -}
+
 {-Dado un tablero, un camino y el numero donde deberia empezar la sucesion, determina si el camino resultante es de Collatz. Primero
 nos tenemos que asegurar de que el numero que nos pasan sea el mismo que la primera posicion del camino (el primer elemento). Si eso se
 cumple y tambien que la lista que obtenemos de traducir las posiciones a elementos del tablero cumple la sucesion de Collatz, devolvemos
