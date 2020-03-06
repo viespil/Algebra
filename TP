@@ -282,7 +282,7 @@ reemplazar a b (x:xs)
 {-Ejemplo:
 reemplazar 3 6 [7,8,3,2]
 7:(reemplazar 3 6 [8,3,2])
-7:8(reemplazar 3 6 [3,2])
+7:8:(reemplazar 3 6 [3,2])
 7:8:[6,2]
 [7,8,6,2] -}
  
