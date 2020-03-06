@@ -65,6 +65,13 @@ maximoFila [x] = x
 maximoFila (x:y:xs) 
  | x > y = maximoFila (x:xs)
  | otherwise = maximoFila (y:xs)
+ 
+{-Ejemplo :
+maximoFila [2,0,5,4]
+maximoFila [2,5,4]
+maximoFila [5,4]
+maximoFila [5]
+5 -}
 
 --Dado un tablero, devuelve el mayor elemento (comparando el mayor de cada fila)
 maximo :: Tablero -> Integer
