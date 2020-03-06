@@ -251,6 +251,19 @@ caminoDeCollatz :: Tablero -> Camino -> Integer -> Bool
 caminoDeCollatz t (c:cs) n 
  | ((valor t c) == n) && (esListaDeCollatz (valoresDeCamino t (c:cs))) = True
  | otherwise = False 
+ 
+{-Ejemplo:
+caminoDeCollatz  [[2,3,2],[4,5,10],[2,1,6]] [(2,2),(2,3),(3,1)] 5
+((valor [[2,3,2],[4,5,10],[2,1,6]] (2,2)) == 5) && (esListaDeCollatz (valoresDeCamino [[2,3,2],[4,5,10],[2,1,6]] [(2,2),(2,3),(3,1)]))
+True && (esListaDeCollatz [5,10,2])
+True && False
+False
+
+caminoDeCollatz  [[2,3,2],[4,5,16],[5,1,8]] [(2,2),(2,3),(3,3)] 5
+((valor [[2,3,2],[4,5,16],[5,1,8]] (2,2)) == 5) && (esListaDeCollatz (valoresDeCamino [[2,3,2],[4,5,16],[5,1,8]] [(2,2),(2,3),(3,3)]))
+True && (esListaDeCollatz [5,16,8])
+True && True
+True -}
 
 --EJERCICIO 5
 
