@@ -95,6 +95,14 @@ aplanar :: Tablero -> [Integer]
 aplanar [] = []
 aplanar t = (head t) ++ (aplanar (tail t))
 
+{-Ejemplo:
+aplanar [[13,12,6],[1,32,25],[2,16,8]]
+[13,12,6] ++ aplanar [[1,32,25],[2,16,8]]
+[13,12,6] ++ [1,32,25] ++ aplanar [[2,16,8]]
+[13,12,6,1,32,25] ++ [2,16,8] ++ aplanar []
+[13,12,6,1,32,25,2,16,8] ++ []
+[13,12,6,1,32,25,2,16,8] -}
+
 {-Dada una lista, crea una lista de tuplas donde cada fst de cada tupla es un elemento de la lista y el snd siempre es un 1. El 1
 hace referencia a la cantidad de apariciones de numeros iguales (mas adelante, en otra funcion veremos que tuplas tienen el mismo 
 fst y a esas les sumaremos esos 1's). Ejemplo: tuplar [2,3,2] devuelve [(2,1),(3,1),(2,1)]-}
