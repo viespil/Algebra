@@ -184,6 +184,13 @@ masApariciones [(2,4)]
 masRepetidoLista :: [Integer] -> Integer
 masRepetidoLista xs = masApariciones (comprimir (tuplar xs))
 
+{-Ejemplo:
+masRepetidoLista [2,5,4,2,2]
+masApariciones (comprimir (tuplar [2,5,4,2,2]))
+masApariciones (comprimir [(2,1),(5,1),(4,1),(2,1),(2,1)])
+masApariciones [(2,3),(5,1),(4,1)]
+2 -}
+
 {-Convertimos al tablero en una lista y buscamos el elemento mas repetido de esa lista-}
 
 masRepetido :: Tablero -> Integer
