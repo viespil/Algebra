@@ -314,6 +314,12 @@ listaMasLarga2 [x, y] = listaMasLarga x y
 listaMasLarga2 (x:y:xs)
  | (length x) >= (length y) = listaMasLarga2 (x:xs)
  | otherwise = listaMasLarga2 (y:xs)
+ 
+{-Ejemplo:
+listaMasLarga2 [[2,3,2,5],[4,5,16],[5,3,4,1,8]]
+listaMasLarga2 [[2,3,2,5],[5,3,4,1,8]]
+listaMasLarga2 [[5,3,4,1,8]]
+[5,3,4,1,8] -}
 
 {-Dada una fila y un numero de la fila, busca la columna en la que aparece (lo que es lo mismo que buscar la posicion de un numero
 en una lista). Suponemos que el numero pertenece a la Fila-}
