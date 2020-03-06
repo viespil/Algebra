@@ -344,6 +344,17 @@ primeraPosicion (f:fs) a
  | pertenece a f = (1, buscarColumna f a)
  | otherwise = (1 + (fst (primeraPosicion fs a)), (snd (primeraPosicion fs a)))
  
+{-Ejemplos: 
+primeraPosicion [[2,3,2],[4,5,3],[5,1,8]] 3
+(1, buscarColumna [2,3,2] 3)
+(1,2)
+
+primeraPosicion [[2,1,2],[4,5,3],[5,1,8]] 3
+(1 + (fst (primeraPosicion [[4,5,3],[5,1,8]] 3)), (snd (primeraPosicion [[4,5,3],[5,1,8]] 3)))
+(1 + fst (1, buscarColumna [4,5,3] 3), snd (1, buscarColumna [4,5,3] 3))
+(1 + 1, snd (1, 3))
+(2,3) -}
+ 
 perteneceATablero :: Integer -> Tablero -> Bool
 perteneceATablero _ [] = False
 perteneceATablero n (f:fs)
