@@ -206,6 +206,14 @@ valoresDeCamino :: Tablero -> Camino -> [Integer]
 valoresDeCamino t [] = []
 valoresDeCamino t (x:xs) = (valor t x):(valoresDeCamino t xs)
 
+{-Ejemplo:
+valoresDeCamino  [[2,3,2],[4,5,7],[2,1,6]] [(2,2),(2,3),(3,1)]
+(valor [[2,3,2],[4,5,7],[2,1,6]] (2,2)):(valoresDeCamino [[2,3,2],[4,5,7],[2,1,6]] [(2,3),(3,1)])
+5:(valor [[2,3,2],[4,5,7],[2,1,6]] (2,3)):(valoresDeCamino [[2,3,2],[4,5,7],[2,1,6]] [(3,1)])
+5:7:(valor [[2,3,2],[4,5,7],[2,1,6]] (3,1)):(valoresDeCamino [[2,3,2],[4,5,7],[2,1,6]] [])
+5:7:2:[]
+[5,7,2] -}
+
 --EJERCICIO 4
 
 --Dado un numero, le aplica la sucesion de Collatz
