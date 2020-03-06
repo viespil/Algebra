@@ -329,6 +329,13 @@ buscarColumna (n:ns) a
  | n == a = 1
  | otherwise = 1 + buscarColumna ns a
 
+{-Ejemplo:
+buscarColumna [4,8,2,3] 2
+1 + buscarColumna [8,2,3] 2
+1 + 1 + buscarColumna [2,3] 2
+1 + 1 + 1
+3 -}
+
 {-Dado un tablero y un numero, devuelve la posicion de la primera aparicion. Si el numero no pertenece al tablero devuelve (0,0)-}
 
 primeraPosicion :: Tablero -> Integer -> (Integer, Integer)
