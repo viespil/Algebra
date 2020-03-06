@@ -383,6 +383,22 @@ esCollatz t p1 p2
  | (valor t p1) == 1 = False
  | (terminoSucCollatz (valor t p1)) == (valor t p2) = True
  | otherwise = False
+ 
+{Ejemplos: 
+esCollatz [[2,3,2],[4,5,3],[5,1,8]] (2,3) (3,3)
+ | valor [[2,3,2],[4,5,3],[5,1,8]] (2,3) == 1 ?
+   3 == 1 False, segunda guarda
+ | (terminoSucCollatz (valor [[2,3,2],[4,5,3],[5,1,8]] (2,3))) == (valor [[2,3,2],[4,5,3],[5,1,8]] (3,3)) ?
+   (terminoSucCollatz 3) == 8 ?
+   10 == 8 False, tercera guarda
+False
+
+esCollatz [[2,3,2],[4,5,3],[5,1,10]] (2,3) (3,3)
+ | valor [[2,3,2],[4,5,3],[5,1,10]] (2,3) == 1 ?
+   3 == 1 False, segunda guarda
+ | (terminoSucCollatz (valor [[2,3,2],[4,5,3],[5,1,10]] (2,3))) == (valor [[2,3,2],[4,5,3],[5,1,10]] (3,3)) ?
+   (terminoSucCollatz 3) == 10 ?
+   10 == 10 True -}
 
 {-Dado un tablero y una posicion, determina que hacer con la posicion siguiente correspondiente a la trayectoria de un camino (el 
 elemento a la derecha o abajo)-}
