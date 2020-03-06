@@ -79,6 +79,14 @@ maximo [x] = maximoFila x
 maximo (x:y:cx)
  | maximoFila x > maximoFila y = maximo (x:cx)
  | otherwise = maximo (y:cx)
+ 
+{- Ejemplo: 
+maximo [[13,12,6],[1,32,25],[2,16,8]]
+maximo [[1,32,25],[2,16,8]]
+maximo [[1,32,25]]
+maximoFila [1,32,25]
+32 -} 
+ 
 
 --EJERCICIO 2 
 
