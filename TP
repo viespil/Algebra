@@ -292,6 +292,14 @@ reemplazarTab _ _ [] = []
 reemplazarTab a b (f:fs)
  | pertenece a f = ((reemplazar a b f):fs)
  | otherwise = f:(reemplazarTab a b fs)
+ 
+{-Ejemplo: 
+reemplazarTab 16 7 [[2,3,2],[4,5,16],[5,1,8]]
+[2,3,2]:(reemplazarTab 16 7 [[4,5,16],[5,1,8]])
+[2,3,2]:((reemplazar 16 7 [4,5,16]):[[5,1,8]])
+[2,3,2]:([4,5,7]:[[5,1,8]])
+[2,3,2]:[[4,5,7],[5,1,8]]
+[[2,3,2],[4,5,7],[5,1,8]] -}
 
 --Dadas dos listas, devuelve la mas larga
 listaMasLarga :: [Integer] -> [Integer] -> [Integer]
