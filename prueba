@@ -463,7 +463,7 @@ lista con todos los caminos posibles. Luego de obtener todos esos caminos, le ap
 a cada posicion-}
 
 functionAux :: Tablero -> Integer -> Conjunto [Integer]
-functionAux tab num = obtenerConjValores tab (aplanar(obtenerCaminos tab (posicionesTablero tab num)))
+functionAux tab num = obtenerConjValores tab (aplanar2(obtenerCaminos tab (posicionesTablero tab num)))
 
 obtenerConjValores :: Tablero -> Conjunto Camino -> Conjunto [Integer]
 obtenerConjValores tab caminos 
