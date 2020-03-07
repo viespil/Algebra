@@ -379,6 +379,10 @@ posicionesTablero t n
 
 -------------------------------------------------------------------------------------------------------------
 
+aplanar2 :: Conjunto [Camino] -> [Camino]
+aplanar2 [] = []
+aplanar2 t = (head t) ++ (aplanar2 (tail t)) 
+
 mayorSecuenciaDeCollatz :: Tablero -> Integer -> [Integer]
 mayorSecuenciaDeCollatz tab numero = listaMasLarga2 (perteneceACollaztAux (functionAux tab numero) numero)
 
@@ -450,6 +454,13 @@ obtenerCaminos tab conj
 [[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]]:[[(2,1),(3,1),(3,2),(3,3)],[(2,1),(2,2),(3,2),(3,3)],[(2,1),(2,2),(2,3),(3,3)]]:[]
 [[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]],[[(2,1),(3,1),(3,2),(3,3)],[(2,1),(2,2),(3,2),(3,3)],[(2,1),(2,2),(2,3),(3,3)]]]
 -}  
+
+{-Dado un tablero y un numero del tablero: primero obtiene todas las posiciones del numero en el tablero. Luego le aplica obtenerCaminos a la
+lista de posiciones (que dado un tablero y un conjunto de posiciones, le aplica tlcD a cada posicion. De cada posicion obtiene todos los caminos
+que terminan en la esquina inferior derecha). Como obtenerCaminos devuelve Conjunto [Camino] (es decir, hay una lista con todos los caminos posibles
+por cada aparicion del numero en el tablero, y como no nos interesa separar en casos segun las apariciones, usamos aplanar para obtener solo una
+lista con todos los caminos posibles. Luego de obtener todos esos caminos, le aplicamos obtenerConjValores para ver los numeros que corresponden
+a cada posicion-}
 
 functionAux :: Tablero -> Integer -> Conjunto [Integer]
 functionAux tab num = obtenerConjValores tab (aplanar(obtenerCaminos tab (posicionesTablero tab num)))
