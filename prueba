@@ -1,0 +1,489 @@
+type Conjunto a = [a]
+type Fila = [Integer]
+type Tablero = [Fila]
+type Posicion = (Integer,Integer)
+type Camino = [Posicion]
+
+sopa1 :: Tablero
+sopa1 = [[13,12,6,4],[1,1,32,25],[9,2,16,8],[7,3,5,4],[1,2,8,2]]
+
+sopa2 :: Tablero
+sopa2 = [[64,5,16,8,9],[32,16,8,4,28],[2,1,4,6,3],[8,4,2,1,10]]
+
+sopa3 :: Tablero
+sopa3 = [[10,5,7,9],[32,16,22,28],[8,4,11,34],[12,6,10,17]]
+
+sopa4 :: Tablero
+sopa4 = [[1,1,2,1], [1,8,4,1], [10,1,1,1], [5,16,1,1]]
+
+camino1 :: Camino 
+camino1 = [(3,3),(3,4),(4,4)]
+
+camino2 :: Camino 
+camino2 = [(1,2),(2,2),(2,3),(3,3),(4,3)]
+
+camino3 :: Camino 
+camino3 = [(1,3),(2,3),(3,3),(3,4)]
+
+camino4 :: Camino
+camino4 = [(4,1),(4,2),(4,3)]
+
+-- Dado la cantidad filas de un tablero.
+cantidadFilas :: Tablero -> Integer
+cantidadFilas t = fromIntegral (length t)
+
+-- Dado la cantidad columnas de un tablero.
+cantidadColumnas :: Tablero -> Integer
+cantidadColumnas (t:ts) = fromIntegral (length t)
+
+-- Devuelve el valor de una posicion de un tablero
+valor :: Tablero -> Posicion -> Integer
+valor (t:ts) (1,y) = valorY t y
+valor (t:ts) (x,y) = valor ts (x-1,y)
+
+valorY :: [Integer] -> Integer -> Integer
+valorY (c:cs) 1 = c
+valorY (c:cs) n = valorY cs (n-1)
+
+{-Ejemplo:
+valor [[13,12,6],[1,32,25],[2,16,8]] (2,3)
+valor [[1,32,25],[2,16,8]] (1,3)
+valorY [1,32,25] 3
+valorY [32,25] 2
+valorY [25] 1
+25 -}
+
+-- Determina si una posicion esta dentro de los limites de un tablero
+posValida :: Tablero -> Posicion -> Bool
+posValida t (x,y) = x >= 1 && x <= (cantidadFilas t) && y >= 1 && y <= (cantidadColumnas t) 
+
+--EJERCICIO 1
+
+--Dada una fila (lista), devuelve su mayor elemento
+maximoFila :: [Integer] -> Integer
+maximoFila [x] = x
+maximoFila (x:y:xs) 
+ | x > y = maximoFila (x:xs)
+ | otherwise = maximoFila (y:xs)
+ 
+{-Ejemplo :
+maximoFila [2,0,5,4]
+maximoFila [2,5,4]
+maximoFila [5,4]
+maximoFila [5]
+5 -}
+
+--Dado un tablero, devuelve el mayor elemento (comparando el mayor de cada fila)
+maximo :: Tablero -> Integer
+maximo [x] = maximoFila x 
+maximo (x:y:cx)
+ | maximoFila x > maximoFila y = maximo (x:cx)
+ | otherwise = maximo (y:cx)
+ 
+{- Ejemplo: 
+maximo [[13,12,6],[1,32,25],[2,16,8]]
+maximo [[1,32,25],[2,16,8]]
+maximo [[1,32,25]]
+maximoFila [1,32,25]
+32 -} 
+ 
+--EJERCICIO 2 
+
+--Convierte un tablero en una lista (concatenando las filas)
+aplanar :: Tablero -> [Integer]
+aplanar [] = []
+aplanar t = (head t) ++ (aplanar (tail t))
+
+{-Ejemplo:
+aplanar [[13,12,6],[1,32,25],[2,16,8]]
+[13,12,6] ++ aplanar [[1,32,25],[2,16,8]]
+[13,12,6] ++ [1,32,25] ++ aplanar [[2,16,8]]
+[13,12,6,1,32,25] ++ [2,16,8] ++ aplanar []
+[13,12,6,1,32,25,2,16,8] ++ []
+[13,12,6,1,32,25,2,16,8] -}
+
+{-Dada una lista, crea una lista de tuplas donde cada fst de cada tupla es un elemento de la lista y el snd siempre es un 1. El 1
+hace referencia a la cantidad de apariciones de numeros iguales (mas adelante, en otra funcion veremos que tuplas tienen el mismo 
+fst y a esas les sumaremos esos 1's). Ejemplo: tuplar [2,3,2] devuelve [(2,1),(3,1),(2,1)]-}
+tuplar :: [Integer] -> [(Integer, Integer)]
+tuplar [] = []
+tuplar (x:xs) = (x, 1):(tuplar xs)
+
+{-Ejemplo:
+tuplar [2,3,2]
+(2,1):(tuplar [3,2])
+(2,1):(3,1):(tuplar [2])
+(2,1):(3,1):(2,1):(tuplar [])
+(2,1):(3,1):(2,1):[]
+[(2,1),(3,1),(2,1)]-}
+
+{-En esta parte sumamos los 1's de la primer tupla-}
+comprimirPrimero :: [(Integer, Integer)] -> [(Integer, Integer)]
+comprimirPrimero [x] = [x]
+comprimirPrimero ((x1, y1):(x2,y2):xs) | x1 == x2 = comprimirPrimero ((x1, y1 + y2):xs)
+                                       | otherwise = comprimirPrimero ((x1, y1):xs)    
+                                       
+{-Ejemplo:
+comprimirPrimero [(2,1),(3,1),(2,1)]
+comprimirPrimero [(2,1),(2,1)]
+comprimirPrimero [(2,1 + 1)]
+comprimirPrimero [(2,2)]
+[(2,2)] -}
+
+--Dada una tupla y una lista de tuplas, quita todas las apariciones de la tupla de la lista
+quitarTupla :: (Integer, Integer) -> [(Integer, Integer)] -> [(Integer, Integer)]
+quitarTupla _ [] = []
+quitarTupla n (x:xs)
+ | n == x = quitarTupla n xs
+ | otherwise = x:(quitarTupla n xs)
+ 
+{-Ejemplo:
+quitarTupla (2,1) [(2,1),(3,1),(2,1)]
+quitarTupla (2,1) [(3,1),(2,1)]
+(3,1):(quitarTupla (2,1) [(2,1)])
+(3,1):(quitarTupla (2,1) [])
+(3,1):[]
+[(3,1)] -}
+
+{-Dada una lista de tuplas de la forma (numero, 1), sumamos los 1's de todas las tuplas. Primero sumamos los 1's de la primera tupla y
+lo concatenamos con la lista que resulta de volver a llamar a la funcion, pero quitando todas las apariciones de la tupla que ya
+comprimimos (que fue la primera) -}
+
+comprimir :: [(Integer, Integer)] -> [(Integer, Integer)]
+comprimir [] = []
+comprimir (x:xs) = (comprimirPrimero (x:xs))++(comprimir (quitarTupla x (x:xs)))
+
+{-Ejemplo:
+comprimir [(2,1),(3,1),(2,1)] 
+(comprimirPrimero [(2,1),(3,1),(2,1)]) ++ (comprimir (quitarTupla (2,1) [(2,1),(3,1),(2,1)]))
+[(2,2)] ++ (comprimir [(3,1)]) 
+[(2,2)] ++ (comprimirPrimero [(3,1)]) ++ (comprimir (quitarTupla (3,1) [(3,1)]))
+[(2,2)] ++ [(3,1)] ++ comprimir [] 
+[(2,2),(3,1)] ++ []
+[(2,2),(3,1)]-}
+
+{-Una vez que comprimimos a [(2,1),(3,1),(2,1)] como [(2,2),(3,1)], falta ver cual tiene el snd mas grande (el snd hace referencia
+a la cantidad de apariciones) -}
+
+masApariciones :: [(Integer, Integer)] -> Integer
+masApariciones [(x1, x2)] = x1
+masApariciones ((x1, x2):(y1, y2):xs)
+ | x2 >= y2 = masApariciones ((x1, x2):xs)
+ | otherwise = masApariciones ((y1, y2):xs)
+ 
+{-Ejemplo: puse un 4 en vez del 2 del ejemplo de antes para que se entienda que devuelve el fst
+masApariciones [(2,4),(3,1)]
+masApariciones (2,4):[]
+masApariciones [(2,4)]
+2 -}
+
+{-Devuelve el elemento mas repetido de una lista-}
+
+masRepetidoLista :: [Integer] -> Integer
+masRepetidoLista xs = masApariciones (comprimir (tuplar xs))
+
+{-Ejemplo:
+masRepetidoLista [2,5,4,2,2]
+masApariciones (comprimir (tuplar [2,5,4,2,2]))
+masApariciones (comprimir [(2,1),(5,1),(4,1),(2,1),(2,1)])
+masApariciones [(2,3),(5,1),(4,1)]
+2 -}
+
+{-Convertimos al tablero en una lista y buscamos el elemento mas repetido de esa lista-}
+
+masRepetido :: Tablero -> Integer
+masRepetido t = masRepetidoLista (aplanar t)
+
+--EJERCICIO 3
+
+{-Dado un tablero y un camino, busca el valor de la primera posicion del camino (el primer elemento) y vuelve a llamar a la funcion
+con las demas posiciones del camino (los demas elementos = la tail de camino). Cuando ya no hay mas elementos en el camino, devuelve
+la lista vacía, que une todo en una lista-}
+
+valoresDeCamino :: Tablero -> Camino -> [Integer]
+valoresDeCamino t [] = []
+valoresDeCamino t (x:xs) = (valor t x):(valoresDeCamino t xs)
+
+{-Ejemplo:
+valoresDeCamino  [[2,3,2],[4,5,7],[2,1,6]] [(2,2),(2,3),(3,1)]
+(valor [[2,3,2],[4,5,7],[2,1,6]] (2,2)):(valoresDeCamino [[2,3,2],[4,5,7],[2,1,6]] [(2,3),(3,1)])
+5:(valor [[2,3,2],[4,5,7],[2,1,6]] (2,3)):(valoresDeCamino [[2,3,2],[4,5,7],[2,1,6]] [(3,1)])
+5:7:(valor [[2,3,2],[4,5,7],[2,1,6]] (3,1)):(valoresDeCamino [[2,3,2],[4,5,7],[2,1,6]] [])
+5:7:2:[]
+[5,7,2] -}
+
+--EJERCICIO 4
+
+--Dado un numero, le aplica la sucesion de Collatz
+terminoSucCollatz :: Integer -> Integer
+terminoSucCollatz n 
+ | mod n 2 == 0 = div n 2
+ | otherwise = 3*n + 1
+
+{-Dada una lista, determina si sus elementos siguen la sucesion de Collatz (preguntando si el resultado de aplicarle la sucesion al
+primer termino devuelve el segundo termino). (*)Si se cumple con el primero y con el segundo(*), vuelve a llamar a la funcion con la tail
+de la lista (para ver si se cumple con el segundo y el tercero de la lista inicial). Si nos quedamos con un elemento, la tail es la
+lista vacia, y eso significa que funciono para todos los elementos anteriores. Entonces devuelve True. Si esto no se cumple quiere
+decir que para algun par de elementos no fue cierto la afirmacion entre (*), entonces devuelve False.-}
+
+esListaDeCollatz :: [Integer] -> Bool
+esListaDeCollatz [x] = True
+esListaDeCollatz (x:y:xs)
+ | y == terminoSucCollatz x = esListaDeCollatz (y:xs) 
+ | otherwise = False
+
+{-Ejemplos:
+esListaDeCollatz [10,5,16]
+esListaDeCollatz [5,16]
+esListaDeCollatz [16]
+True
+
+esListaDeCollatz [10,5,2]
+esListaDeCollatz [5,2]
+False -}
+
+{-Dado un tablero, un camino y el numero donde deberia empezar la sucesion, determina si el camino resultante es de Collatz. Primero
+nos tenemos que asegurar de que el numero que nos pasan sea el mismo que la primera posicion del camino (el primer elemento). Si eso se
+cumple y tambien que la lista que obtenemos de traducir las posiciones a elementos del tablero cumple la sucesion de Collatz, devolvemos
+True. Si alguna de las anteriores no se cumple, devolvemos False.-}
+
+caminoDeCollatz :: Tablero -> Camino -> Integer -> Bool
+caminoDeCollatz t (c:cs) n 
+ | ((valor t c) == n) && (esListaDeCollatz (valoresDeCamino t (c:cs))) = True
+ | otherwise = False 
+ 
+{-Ejemplo:
+caminoDeCollatz  [[2,3,2],[4,5,10],[2,1,6]] [(2,2),(2,3),(3,1)] 5
+((valor [[2,3,2],[4,5,10],[2,1,6]] (2,2)) == 5) && (esListaDeCollatz (valoresDeCamino [[2,3,2],[4,5,10],[2,1,6]] [(2,2),(2,3),(3,1)]))
+True && (esListaDeCollatz [5,10,2])
+True && False
+False
+
+caminoDeCollatz  [[2,3,2],[4,5,16],[5,1,8]] [(2,2),(2,3),(3,3)] 5
+((valor [[2,3,2],[4,5,16],[5,1,8]] (2,2)) == 5) && (esListaDeCollatz (valoresDeCamino [[2,3,2],[4,5,16],[5,1,8]] [(2,2),(2,3),(3,3)]))
+True && (esListaDeCollatz [5,16,8])
+True && True
+True -}
+
+--EJERCICIO 5
+
+pertenece :: Eq a => a -> [a] -> Bool
+pertenece _ [] = False
+pertenece a (x:xs) = a == x || pertenece a xs
+
+{-Dados dos numeros y una lista, reemplaza al primer numero por el segundo en la lista (suponemos que el primer numero pertenece
+a la lista)-}
+
+reemplazar :: Integer -> Integer -> [Integer] -> [Integer]
+reemplazar a b (x:xs)
+ | a == x = (b:xs)
+ | otherwise = x:(reemplazar a b xs)
+ 
+{-Ejemplo:
+reemplazar 3 6 [7,8,3,2]
+7:(reemplazar 3 6 [8,3,2])
+7:8:(reemplazar 3 6 [3,2])
+7:8:[6,2]
+[7,8,6,2] -}
+ 
+{-Dados dos numeros y un tablero, reemplaza al primer numero por el segundo en el tablero-}
+reemplazarTab :: Integer -> Integer -> Tablero -> Tablero
+reemplazarTab _ _ [] = []
+reemplazarTab a b (f:fs)
+ | pertenece a f = ((reemplazar a b f):fs)
+ | otherwise = f:(reemplazarTab a b fs)
+ 
+{-Ejemplo: 
+reemplazarTab 16 7 [[2,3,2],[4,5,16],[5,1,8]]
+[2,3,2]:(reemplazarTab 16 7 [[4,5,16],[5,1,8]])
+[2,3,2]:((reemplazar 16 7 [4,5,16]):[[5,1,8]])
+[2,3,2]:([4,5,7]:[[5,1,8]])
+[2,3,2]:[[4,5,7],[5,1,8]]
+[[2,3,2],[4,5,7],[5,1,8]] -}
+
+--Dadas dos listas, devuelve la mas larga
+listaMasLarga :: [Integer] -> [Integer] -> [Integer]
+listaMasLarga xs ys
+ | length xs >= length ys = xs
+ | otherwise = ys
+
+--Dada una lista de listas, devuelve la lista mas larga
+listaMasLarga2 :: [[Integer]] -> [Integer]
+listaMasLarga2 [x] = x
+listaMasLarga2 [x, y] = listaMasLarga x y
+listaMasLarga2 (x:y:xs)
+ | (length x) >= (length y) = listaMasLarga2 (x:xs)
+ | otherwise = listaMasLarga2 (y:xs)
+ 
+{-Ejemplo:
+listaMasLarga2 [[2,3,2,5],[4,5,16],[5,3,4,1,8]]
+listaMasLarga2 [[2,3,2,5],[5,3,4,1,8]]
+listaMasLarga2 [[5,3,4,1,8]]
+[5,3,4,1,8] -}
+
+{-Dada una fila y un numero de la fila, busca la columna en la que aparece (lo que es lo mismo que buscar la posicion de un numero
+en una lista). Suponemos que el numero pertenece a la Fila-}
+
+buscarColumna :: Fila -> Integer -> Integer
+buscarColumna (n:ns) a
+ | n == a = 1
+ | otherwise = 1 + buscarColumna ns a
+
+{-Ejemplo:
+buscarColumna [4,8,2,3] 2
+1 + buscarColumna [8,2,3] 2
+1 + 1 + buscarColumna [2,3] 2
+1 + 1 + 1
+3 -}
+
+{-Dado un tablero y un numero, devuelve la posicion de la primera aparicion. Si el numero no pertenece al tablero devuelve (0,0)-}
+
+primeraPosicion :: Tablero -> Integer -> (Integer, Integer)
+primeraPosicion [] _ = (0, 0)
+primeraPosicion (f:fs) a
+ | pertenece a f = (1, buscarColumna f a)
+ | otherwise = (1 + (fst (primeraPosicion fs a)), (snd (primeraPosicion fs a)))
+ 
+{-Ejemplos: 
+primeraPosicion [[2,3,2],[4,5,3],[5,1,8]] 3
+(1, buscarColumna [2,3,2] 3)
+(1,2)
+
+primeraPosicion [[2,1,2],[4,5,3],[5,1,8]] 3
+(1 + (fst (primeraPosicion [[4,5,3],[5,1,8]] 3)), (snd (primeraPosicion [[4,5,3],[5,1,8]] 3)))
+(1 + fst (1, buscarColumna [4,5,3] 3), snd (1, buscarColumna [4,5,3] 3))
+(1 + 1, snd (1, 3))
+(2,3) -}
+ 
+perteneceATablero :: Integer -> Tablero -> Bool
+perteneceATablero _ [] = False
+perteneceATablero n (f:fs)
+ | pertenece n f = True
+ | otherwise = perteneceATablero n fs
+
+{-Dado un tablero y un numero, devuelve todas las posiciones de ese numero en el tablero. Primero busca la de la primera aparicion,
+la guarda, y cuando vuelve a llamar a la funcion reemplaza el numero por el mismo con el signo cambiado (asi conservamos la misma
+cantidad de elementos y cuando vuelve a buscar la primera aparicion, en realidad ahora encontraria la segunda)
+Ejemplo: posicionesTablero [[2,1], [3,2], [2,1]] 2 ~
+(primeraPosicion [[2,1], [3,2], [2,1]] 2):(posicionesTablero [[-2,1], [3,2], [2,1]] 2) 
+~ (1,1):(primeraPosicion [[-2,1], [3,2], [2,1]] 2):(posicionesTablero [[-2,1], [3,-2], [2,1]] 2)
+~ (1,1):(2,2):(posicionesTablero [[-2,1], [3,-2], [2,1]] 2)
+~ (1,1):(2,2):(primeraPosicion [[-2,1], [3,-2], [2,1]] 2):(posicionesTablero [[-2,1], [3,-2], [-2,1]] 2)
+~ (1,1):(2,2):(3,1):(posicionesTablero [[-2,1], [3,-2], [-2,1]] 2) Como ya el 2 no pertenece a este tablero devuelve []
+~ (1,1):(2,2):(3,1):[] ~ [(1,1):(2,2):(3,1)] -}
+
+posicionesTablero :: Tablero -> Integer -> [(Integer, Integer)]
+posicionesTablero t n 
+ | perteneceATablero n t = (primeraPosicion t n):(posicionesTablero (reemplazarTab n (-n) t) n)
+ | otherwise = [] 
+
+{-Dado un tablero y dos posiciones, determina si la segunda resulta de aplicarle la sucesion de Collatz a la primera-}
+esCollatz :: Tablero -> Posicion -> Posicion -> Bool
+esCollatz t p1 p2
+ | (valor t p1) == 1 = False
+ | (terminoSucCollatz (valor t p1)) == (valor t p2) = True
+ | otherwise = False
+ 
+{-Ejemplos: 
+esCollatz [[2,3,2],[4,5,3],[5,1,8]] (2,3) (3,3)
+ | valor [[2,3,2],[4,5,3],[5,1,8]] (2,3) == 1 ?
+   3 == 1 False, segunda guarda
+ | (terminoSucCollatz (valor [[2,3,2],[4,5,3],[5,1,8]] (2,3))) == (valor [[2,3,2],[4,5,3],[5,1,8]] (3,3)) ?
+   (terminoSucCollatz 3) == 8 ?
+   10 == 8 False, tercera guarda
+False
+
+esCollatz [[2,3,2],[4,5,3],[5,1,10]] (2,3) (3,3)
+ | valor [[2,3,2],[4,5,3],[5,1,10]] (2,3) == 1 ?
+   3 == 1 False, segunda guarda
+ | (terminoSucCollatz (valor [[2,3,2],[4,5,3],[5,1,10]] (2,3))) == (valor [[2,3,2],[4,5,3],[5,1,10]] (3,3)) ?
+   (terminoSucCollatz 3) == 10 ?
+   10 == 10 True -}
+
+{-Dado un tablero y una posicion, determina que hacer con la posicion siguiente correspondiente a la trayectoria de un camino (el 
+elemento a la derecha o abajo)-}
+verSiguiente :: Tablero -> Posicion -> [Integer]
+verSiguiente t (x, y)
+ | ambasValidasAmbasCollatz = listaMasLarga ((valor t (x, y)):(verSiguiente t (x, y + 1))) ((valor t (x, y)):(verSiguiente t (x + 1, y)))
+ | ambasValidasPrimeraCollatz = (valor t (x,y)):(verSiguiente t (x, y + 1))
+ | ambasValidasSegundaCollatz = (valor t (x,y)):(verSiguiente t (x + 1, y))
+ | ambasValidasNingunaCollatz = [valor t (x,y)]
+ | segundaValidaNoCollatz = [valor t (x,y)]
+ | segundaValidaYCollatz = (valor t (x,y)):(verSiguiente t (x + 1, y))
+ | primeraValidaYCollatz = (valor t (x,y)):(verSiguiente t (x, y + 1))
+ | primeraValidaNoCollatz = [valor t (x,y)]
+ | ningunaValida = [valor t (x,y)]
+ where ambasValidasAmbasCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && (esCollatz t (x, y) (x, y + 1)) && (esCollatz t (x, y) (x + 1, y))
+       ambasValidasPrimeraCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && (esCollatz t (x, y) (x, y + 1)) && not (esCollatz t (x, y) (x + 1, y))
+       ambasValidasSegundaCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x, y + 1)) && (esCollatz t (x, y) (x + 1, y))
+       ambasValidasNingunaCollatz = (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x, y + 1)) && not (esCollatz t (x, y) (x + 1, y))
+       segundaValidaNoCollatz = not (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x + 1, y))
+       segundaValidaYCollatz = not (posValida t (x, y + 1)) && (posValida t (x + 1, y)) && (esCollatz t (x, y) (x + 1, y))
+       primeraValidaYCollatz = (posValida t (x, y + 1)) && not (posValida t (x + 1, y)) && (esCollatz t (x, y) (x, y + 1))
+       primeraValidaNoCollatz = (posValida t (x, y + 1)) && not (posValida t (x + 1, y)) && not (esCollatz t (x, y) (x, y + 1))
+       ningunaValida = not (posValida t (x, y + 1)) && not (posValida t (x + 1, y))
+
+{-Dado un tablero y una lista de posiciones, devuelve todos los caminos posibles empezando por cada posicion-}
+caminos :: Tablero -> [Posicion] -> [[Integer]]
+caminos _ [] = []
+caminos t (p:ps) = (verSiguiente t p):(caminos t ps) 
+
+-------------------------------------------------------------------------------------------------------------
+
+mayorSecuenciaDeCollatz :: Tablero -> Integer -> [Integer]
+mayorSecuenciaDeCollatz tab numero = listaMasLarga2 (perteneceACollaztAux (functionAux tab numero) numero)
+
+{-tlcd = todos los caminos desde
+pat = prefijar a todos-}
+
+tlcD :: Tablero -> Posicion -> [Camino]
+tlcD tab pos
+ | not (posValida tab (derecha pos)) && not (posValida tab (abajo pos)) = [[pos]]
+ | not (posValida tab (derecha pos)) = pat pos (tlcD tab (abajo pos))
+ | not (posValida tab (abajo pos)) = pat pos (tlcD tab (derecha pos))
+ | otherwise = pat pos (tlcD tab (abajo pos) ++ tlcD tab (derecha pos))
+
+pat :: Posicion -> [Camino] -> [Camino]
+pat pos [] = []
+pat pos (c:cs) = (pos:c):(pat pos cs)
+
+derecha :: Posicion -> Posicion
+derecha (i,j) = (i,j+1)
+
+abajo :: Posicion -> Posicion
+abajo (i,j) = (i+1,j)
+
+functionAux :: Tablero -> Integer -> Conjunto [Integer]
+functionAux tab num = obtenerConjValores tab (aplanar(obtenerCaminos tab (posicionesTablero tab num)))
+
+obtenerConjValores :: Tablero -> Conjunto Camino -> Conjunto [Integer]
+obtenerConjValores tab caminos 
+ | length caminos == 0 = []
+ | otherwise = (obtenerValores tab (head caminos)):(obtenerConjValores tab (tail caminos))
+
+obtenerValores :: Tablero -> Conjunto Posicion -> [Integer]
+obtenerValores tab pos
+ | length pos == 0 = []
+ | otherwise = (valor tab (head pos)):(obtenerValores tab (tail pos)) 
+
+obtenerCaminos :: Tablero -> Conjunto Posicion -> Conjunto [Camino]
+obtenerCaminos tab conj
+ | length conj == 0 = []
+ | otherwise = (tlcD tab (head conj)):(obtenerCaminos tab (tail conj))
+
+sucesionDeCollatz :: Integer -> [Integer]
+sucesionDeCollatz n
+ | n == 1 = 1:[]
+ | otherwise = n : sucesionDeCollatz (terminoSucCollatz n)
+
+perteneceACollaztAux :: Conjunto [Integer] -> Integer -> Conjunto [Integer]
+perteneceACollaztAux conjunto numero
+ | length conjunto == 0 = []
+ | otherwise = (perteneceACollazt (head conjunto) (sucesionDeCollatz numero)):(perteneceACollaztAux (tail conjunto) numero)
+
+perteneceACollazt :: [Integer] -> [Integer] -> [Integer]
+perteneceACollazt lista listaCollatz
+ | length lista == 0 || length listaCollatz == 0 = []
+ | (head lista) == (head listaCollatz) = (head lista):(perteneceACollazt (tail lista) (tail listaCollatz))
+ | otherwise = []
+
