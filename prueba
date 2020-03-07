@@ -382,8 +382,25 @@ posicionesTablero t n
 mayorSecuenciaDeCollatz :: Tablero -> Integer -> [Integer]
 mayorSecuenciaDeCollatz tab numero = listaMasLarga2 (perteneceACollaztAux (functionAux tab numero) numero)
 
-{-tlcd = todos los caminos desde
-pat = prefijar a todos-}
+{-Dada una posicion y una lista de caminos, inserta la posicion adelante de cada camino. pat = prefijar a todos-}
+pat :: Posicion -> [Camino] -> [Camino]
+pat pos [] = []
+pat pos (c:cs) = (pos:c):(pat pos cs)
+
+{-pat (3,2) [[(3,3)]]
+(3,2):[(3,3)]:(pat (3,2) [])
+[(3,2),(3,3)]:[]
+[[(3,2),(3,3)]]
+
+pat (2,2) [[(3,2),(3,3)],[(2,3),(3,3)]]
+((2,2):[(3,2),(3,3)]):(pat (2,2) [(2,3),(3,3)])
+[(2,2),(3,2),(3,3)]:((2,2):[(2,3),(3,3)]):(pat (2,2) [])
+[(2,2),(3,2),(3,3)]:[(2,2),(2,3),(3,3)]:[]
+[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]]
+-}
+
+{-Dado un tablero y una posicion, devuelve todos los caminos que terminan en la ultima posicion (la que esta
+en la esquina inferior derecha del tablero). tlcD = todos los caminos desde-}
 
 tlcD :: Tablero -> Posicion -> [Camino]
 tlcD tab pos
@@ -391,16 +408,48 @@ tlcD tab pos
  | not (posValida tab (derecha pos)) = pat pos (tlcD tab (abajo pos))
  | not (posValida tab (abajo pos)) = pat pos (tlcD tab (derecha pos))
  | otherwise = pat pos (tlcD tab (abajo pos) ++ tlcD tab (derecha pos))
+ 
+{-tlcD [[1,2,3],[4,5,6],[7,8,9]] (2,2)
+pat (2,2) (tlcD [[1,2,3],[4,5,6],[7,8,9]] (abajo (2,2))) ++ tlcD [[1,2,3],[4,5,6],[7,8,9]] (derecha (2,2))
+pat (2,2) [[(3,2),(3,3)]] ++ [[(2,3),(3,3)]]
+pat (2,2) [[(3,2),(3,3)],[(2,3),(3,3)]]
+[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]]
 
-pat :: Posicion -> [Camino] -> [Camino]
-pat pos [] = []
-pat pos (c:cs) = (pos:c):(pat pos cs)
+
+tlcD [[1,2,3],[4,5,6],[7,8,9]] (3,2)
+pat (3,2) (tlcD [[1,2,3],[4,5,6],[7,8,9]] (derecha (3,2)))
+pat (3,2) (tlcD [[1,2,3],[4,5,6],[7,8,9]] (3,3))
+pat (3,2) [[(3,3)]]
+[[(3,2),(3,3)]]
+
+tlcD [[1,2,3],[4,5,6],[7,8,9]] (2,3)
+pat (2,3) (tlcD [[1,2,3],[4,5,6],[7,8,9]] (abajo (2,3)))
+pat (2,3) (tlcD [[1,2,3],[4,5,6],[7,8,9]] (3,3))
+pat (2,3) [[(3,3)]]
+[[(2,3),(3,3)]] -}  
 
 derecha :: Posicion -> Posicion
 derecha (i,j) = (i,j+1)
 
 abajo :: Posicion -> Posicion
 abajo (i,j) = (i+1,j)
+
+{-Dado un tablero y un conjunto de posiciones, le aplica tlcD a cada posicion. De cada posicion
+obtiene todos los caminos que terminan en la esquina inferior derecha-}
+
+obtenerCaminos :: Tablero -> Conjunto Posicion -> Conjunto [Camino]
+obtenerCaminos tab conj
+ | length conj == 0 = []
+ | otherwise = (tlcD tab (head conj)):(obtenerCaminos tab (tail conj))
+ 
+{-obtenerCaminos [[1,2,3],[4,5,6],[7,8,9]] [(2,2),(2,1)]
+(tlcD [[1,2,3],[4,5,6],[7,8,9]] (head [(2,2),(2,1)])):(obtenerCaminos [[1,2,3],[4,5,6],[7,8,9]] (tail [(2,2),(2,1)]))
+(tlcD [[1,2,3],[4,5,6],[7,8,9]] (2,2)):(obtenerCaminos [[1,2,3],[4,5,6],[7,8,9]] [(2,1)])
+[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]]:(tlcD [[1,2,3],[4,5,6],[7,8,9]] (2,1)):(obtenerCaminos tab [])
+[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]]:[[(2,1),(3,1),(3,2),(3,3)],[(2,1),(2,2),(3,2),(3,3)],[(2,1),(2,2),(2,3),(3,3)]]:[]
+[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]]:[[(2,1),(3,1),(3,2),(3,3)],[(2,1),(2,2),(3,2),(3,3)],[(2,1),(2,2),(2,3),(3,3)]]:[]
+[[[(2,2),(3,2),(3,3)],[(2,2),(2,3),(3,3)]],[[(2,1),(3,1),(3,2),(3,3)],[(2,1),(2,2),(3,2),(3,3)],[(2,1),(2,2),(2,3),(3,3)]]]
+-}  
 
 functionAux :: Tablero -> Integer -> Conjunto [Integer]
 functionAux tab num = obtenerConjValores tab (aplanar(obtenerCaminos tab (posicionesTablero tab num)))
@@ -414,11 +463,6 @@ obtenerValores :: Tablero -> Conjunto Posicion -> [Integer]
 obtenerValores tab pos
  | length pos == 0 = []
  | otherwise = (valor tab (head pos)):(obtenerValores tab (tail pos)) 
-
-obtenerCaminos :: Tablero -> Conjunto Posicion -> Conjunto [Camino]
-obtenerCaminos tab conj
- | length conj == 0 = []
- | otherwise = (tlcD tab (head conj)):(obtenerCaminos tab (tail conj))
 
 sucesionDeCollatz :: Integer -> [Integer]
 sucesionDeCollatz n
